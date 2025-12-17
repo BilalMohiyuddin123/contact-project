@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contact Manager</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        max-width: 600px;
+        margin: auto;
+      }
+      input {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+      }
+      button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      .card {
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin: 10px 0;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Add Contact</h2>
+    <input id="name" placeholder="Name" />
+    <input id="email" placeholder="Email" />
+    <input id="phone" placeholder="Phone" />
+    <button onclick="addContact()">Save Contact</button>
+    <hr />
+    <h3>All Contacts</h3>
+    <div id="list"></div>
+
+    <script>
+      // Use localhost:5000 because your browser (the client) runs on your host machine
+      const API_URL = "http://localhost:5000/contacts";
+
+      async function loadContacts() {
+        try {
+          const res = await fetch(API_URL);
+          const data = await res.json();
+          document.getElementById("list").innerHTML = data
+            .map(
+              (c) =>
+                `<div class="card">
+                        <div><b>${c.name}</b><br>${c.email}<br>${c.phone}</div>
+                        <button onclick="deleteContact('${c._id}')" style="background:red">Delete</button>
+                    </div>`
+            )
+            .join("");
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      async function addContact() {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, phone }),
+        });
+        loadContacts();
+      }
+
+      async function deleteContact(id) {
+        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        loadContacts();
+      }
+      loadContacts();
+    </script>
+  </body>
+</html>

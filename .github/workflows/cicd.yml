@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+# Task B2: Trigger Configuration (Runs on push to main branch)
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout Code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Build Stage (Backend)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          npm install
+
+      # 3. Automated Tests
+      - name: Run Tests
+        run: |
+          cd backend
+          npm test
+
+      # 4. Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 5. Build and Push Docker Image (Task B1)
+      - name: Build and Push Backend Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          # CHANGE THIS to your actual DockerHub username
+          tags: bilalmohiyuddin/contact-backend:latest
+
+      # 6. Deployment Step (Simulated for Exam Requirement)
+      - name: Deploy to Kubernetes
+        run: echo "Deploying application to Azure Kubernetes Service..."
